@@ -1,8 +1,17 @@
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models import Ticket, TicketStatus
 from app.schemas import TicketCreate, TicketUpdate
+
+
+def commit(session):
+    try:
+        session.commit()
+    except SQLAlchemyError:
+        session.rollback()
+        raise
 
 
 def create_ticket(
@@ -17,7 +26,7 @@ def create_ticket(
     )
 
     session.add(ticket)
-    session.commit()
+    commit(session)
     session.refresh(ticket)
 
     return ticket
@@ -50,7 +59,7 @@ def update_ticket(
     ticket.description = ticket_data.description
     ticket.status = ticket_data.status
 
-    session.commit()
+    commit(session)
     session.refresh(ticket)
 
     return ticket
@@ -63,7 +72,7 @@ def close_ticket(
     """Close and persist a ticket."""
     ticket.status = TicketStatus.CLOSED
 
-    session.commit()
+    commit(session)
     session.refresh(ticket)
 
     return ticket
