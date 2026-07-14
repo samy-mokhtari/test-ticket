@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Ticket
-from app.schemas import TicketCreate, TicketStatus, TicketUpdate
+from app.models import Ticket, TicketStatus
+from app.schemas import TicketCreate, TicketUpdate
 
 
 def create_ticket(
