@@ -7,6 +7,7 @@ from sqlalchemy import Table
 
 from app.database import Base, engine
 from app.models import Ticket
+from app.routers.tickets import router as tickets_router
 
 
 @asynccontextmanager
@@ -25,6 +26,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+app.include_router(tickets_router)
 
 
 @app.get("/health", tags=["Health"])
