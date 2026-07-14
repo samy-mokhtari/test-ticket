@@ -37,7 +37,7 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/samy-mokhtari/test-ticket
-cd test-ticket-api
+cd test-ticket
 ```
 
 Build and start the API:
