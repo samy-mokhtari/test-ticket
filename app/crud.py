@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Ticket
-from app.schemas import TicketCreate
+from app.schemas import TicketCreate, TicketUpdate
 
 
 def create_ticket(
@@ -38,3 +38,19 @@ def get_ticket(
 ) -> Ticket | None:
     """Return a ticket by identifier, if it exists."""
     return session.get(Ticket, ticket_id)
+
+
+def update_ticket(
+    session: Session,
+    ticket: Ticket,
+    ticket_data: TicketUpdate,
+) -> Ticket:
+    """Update and persist a ticket."""
+    ticket.title = ticket_data.title
+    ticket.description = ticket_data.description
+    ticket.status = ticket_data.status
+
+    session.commit()
+    session.refresh(ticket)
+
+    return ticket
