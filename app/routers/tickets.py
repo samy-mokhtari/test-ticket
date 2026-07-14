@@ -14,6 +14,25 @@ router = APIRouter(
 )
 
 
+def _get_ticket_or_404(
+    session: Session,
+    ticket_id: int,
+) -> Ticket:
+    """Return a ticket or raise an HTTP 404 error."""
+    ticket = crud.get_ticket(
+        session=session,
+        ticket_id=ticket_id,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ticket not found",
+        )
+
+    return ticket
+
+
 @router.post(
     "/",
     response_model=TicketRead,
@@ -53,18 +72,10 @@ def get_ticket(
     session: Annotated[Session, Depends(get_db)],
 ) -> Ticket:
     """Return a ticket by identifier."""
-    ticket = crud.get_ticket(
+    return _get_ticket_or_404(
         session=session,
         ticket_id=ticket_id,
     )
-
-    if ticket is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ticket not found",
-        )
-
-    return ticket
 
 
 @router.put(
@@ -79,19 +90,35 @@ def update_ticket(
     session: Annotated[Session, Depends(get_db)],
 ) -> Ticket:
     """Fully update a ticket by identifier."""
-    ticket = crud.get_ticket(
+    ticket = _get_ticket_or_404(
         session=session,
         ticket_id=ticket_id,
     )
-
-    if ticket is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ticket not found",
-        )
 
     return crud.update_ticket(
         session=session,
         ticket=ticket,
         ticket_data=ticket_data,
+    )
+
+
+@router.patch(
+    "/{ticket_id}/close",
+    response_model=TicketRead,
+    status_code=status.HTTP_200_OK,
+    summary="Close a ticket",
+)
+def close_ticket(
+    ticket_id: int,
+    session: Annotated[Session, Depends(get_db)],
+) -> Ticket:
+    """Close a ticket by identifier."""
+    ticket = _get_ticket_or_404(
+        session=session,
+        ticket_id=ticket_id,
+    )
+
+    return crud.close_ticket(
+        session=session,
+        ticket=ticket,
     )

@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Ticket
-from app.schemas import TicketCreate, TicketUpdate
+from app.schemas import TicketCreate, TicketStatus, TicketUpdate
 
 
 def create_ticket(
@@ -49,6 +49,19 @@ def update_ticket(
     ticket.title = ticket_data.title
     ticket.description = ticket_data.description
     ticket.status = ticket_data.status
+
+    session.commit()
+    session.refresh(ticket)
+
+    return ticket
+
+
+def close_ticket(
+    session: Session,
+    ticket: Ticket,
+) -> Ticket:
+    """Close and persist a ticket."""
+    ticket.status = TicketStatus.CLOSED
 
     session.commit()
     session.refresh(ticket)
