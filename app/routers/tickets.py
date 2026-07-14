@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -29,3 +29,39 @@ def create_ticket(
         session=session,
         ticket_data=ticket_data,
     )
+
+
+@router.get(
+    "/",
+    response_model=list[TicketRead],
+    summary="List tickets",
+)
+def list_tickets(
+    session: Annotated[Session, Depends(get_db)],
+) -> list[Ticket]:
+    """Return all tickets."""
+    return crud.list_tickets(session=session)
+
+
+@router.get(
+    "/{ticket_id}",
+    response_model=TicketRead,
+    summary="Get a ticket",
+)
+def get_ticket(
+    ticket_id: int,
+    session: Annotated[Session, Depends(get_db)],
+) -> Ticket:
+    """Return a ticket by identifier."""
+    ticket = crud.get_ticket(
+        session=session,
+        ticket_id=ticket_id,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ticket not found",
+        )
+
+    return ticket
